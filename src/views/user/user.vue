@@ -16,7 +16,7 @@ const goOrder = (active) => {
 }
 const quit = () => {
   localStorage.removeItem('userInfo')
-  localStorage.removeItem('token')
+  localStorage.removeItem('c_token')
   router.push('/login')
 }
 </script>
@@ -28,24 +28,24 @@ const quit = () => {
       <div class="text">{{ userInfo.name }}</div>
     </div>
     <div class="order">
-      <div class="top" @click="goOrder">
+      <div class="top" @click="goOrder('all')">
         <div class="text1">我的订单</div>
         <div class="text2">全部</div>
       </div>
-      <div class="buttom">
+      <div class="button">
         <div class="item">
-          <van-image @click="goOrder(1)" width="40" height="40" src="/img/od_10.png" />
+          <van-image @click="goOrder('pending')" width="40" height="40" src="/img/od_10.png" />
           <div>待支付</div>
         </div>
-        <div @click="goOrder(2)" class="item">
+        <div @click="goOrder('unserved')" class="item">
           <van-image width="40" height="40" src="/img/od_20.png" />
           <div>待服务</div>
         </div>
-        <div @click="goOrder(3)" class="item">
+        <div @click="goOrder('done')" class="item">
           <van-image width="40" height="40" src="/img/od_30.png" />
           <div>已完成</div>
         </div>
-        <div @click="goOrder(4)" class="item">
+        <div @click="goOrder('canceled')" class="item">
           <van-image width="40" height="40" src="/img/od_40.png" />
           <div>已取消</div>
         </div>
@@ -83,7 +83,7 @@ const quit = () => {
       title="提示"
       show-cancel-button
     >
-      <div class="quit_text">是否确认退出登陆</div>
+      <div class="quit_text">是否确认退出登录</div>
     </van-dialog>
   </div>
 </template>
@@ -132,7 +132,7 @@ const quit = () => {
       }
       border-bottom: 0.5px solid #f5f5f5;
     }
-    .buttom {
+    .button {
       padding: 0 10px 15px 10px;
       display: flex;
       justify-content: space-around;

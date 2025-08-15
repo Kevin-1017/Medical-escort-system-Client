@@ -9,76 +9,63 @@ const router = useRouter()
 const route = useRoute()
 const { proxy } = getCurrentInstance()
 
-const createInfo = ref({})
+// 请求参数
+const paginationData = reactive({
+  pageNum: 1,
+  pageSize: 1000,
+})
+
+const createInfo = ref()
 const showHospital = ref(false)
 const showCompanion = ref(false)
 const showDate = ref(false)
-const showcode = ref(false)
+const showCode = ref(false)
 const code = ref()
-const currentDate = ref()
 const minDate = ref(new Date())
 const from = reactive({})
-const hospitalColumns = computed(() => {
-  return createInfo.value?.hospitals?.map((item) => {
-    return { text: item.name, value: item.id }
-  })
-})
-const companionColumns = computed(() => {
-  return createInfo.value?.companion?.map((item) => {
-    return { text: item.name, value: item.id }
-  })
-})
-const timer = computed(() => {
-  return currentDate.value?.toString().replaceAll(',', '-') || '请选择就诊时间'
-})
-const companion_name = computed(() => {
-  return (
-    createInfo?.value?.companion?.find((item) => item.id === from.companion_id)?.name ||
-    '请选择陪诊师'
-  )
-})
+
+// 只获取陪护师信息，
 const getCreateInfo = async () => {
-  const res = await proxy.$api.getCreateInfo()
-  if (res) {
-    createInfo.value = res
-    // 选择医院
-    let id = route.query.id
-    let hospital = createInfo.value.hospitals.find((item) => item.id === +id)
-    from.hospital_id = hospital.id
-    from.hospital_name = hospital.name
-  }
+  const res = await proxy.$api.getCreateList(paginationData)
+  const { list, total: _ } = res
+  createInfo.value = list
 }
-const goback = () => {
-  router.go(-1)
-}
-const companionOnConfirm = (item) => {
-  from.companion_id = item.selectedValues[0]
+const companionColumns = computed(() => {
+  return createInfo.value?.map((item) => {
+    return { text: item.name, value: item.id }
+  })
+})
+const companionOnConfirm = ({ selectedOptions }) => {
+  from.companion_id = selectedOptions[0].value
+  from.companion_name = selectedOptions[0].text
   showCompanion.value = false
 }
-const hospitalOnConfirm = async (item) => {
-  from.hospital_id = item.selectedValues[0]
-  from.hospital_name = createInfo.value.hospitals.find((item) => item.id === from.hospital_id).name
+const hospitalColumns = [
+  { text: '医院一', value: 1 },
+  { text: '医院二', value: 2 },
+]
+const hospitalOnConfirm = ({ selectedOptions }) => {
+  from.hospital_id = selectedOptions[0].value
+  from.hospital_name = selectedOptions[0].text
   showHospital.value = false
 }
-const dateOnConfirm = async () => {
-  let time = currentDate.value.toString().replaceAll(',', '')
-  let date = new Date(time.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'))
-  from.starttime = date.getTime()
 
+const dateOnConfirm = ({ selectedValues }) => {
+  from.start_time = selectedValues.join('-')
   showDate.value = false
 }
 const closeCode = async () => {
-  showcode.value = false
+  showCode.value = false
   router.push('/order')
 }
-const sumbit = async () => {
+const submit = async () => {
   let arr = [
     'companion_id',
     'demand',
     'hospital_id',
     'hospital_name',
     'receiveAddress',
-    'starttime',
+    'start_time',
     'tel',
   ]
   for (const i of arr) {
@@ -88,21 +75,28 @@ const sumbit = async () => {
     }
   }
 
-  let res = await proxy.$api.createOrder(from)
-  QRCode.toDataURL(res.wx_code).then((url) => {
+  await proxy.$api.createOrder(from)
+  QRCode.toDataURL('https://www.example.com').then((url) => {
     code.value = url
-    showcode.value = true
+    showCode.value = true
   })
 }
+const goBack = () => {
+  router.go(-1)
+}
+
 onMounted(() => {
   getCreateInfo()
+  from.hospital_id = parseInt(route.query.id)
+  const hospital = hospitalColumns.find((item) => item.value == from.hospital_id)
+  from.hospital_name = hospital ? hospital.text : '请选择就诊医院'
 })
 </script>
 
 <template>
   <div class="container">
     <div class="header">
-      <van-icon @click="goback" class="header-left" name="arrow-left" size="30" />
+      <van-icon @click="goBack" class="header-left" name="arrow-left" size="30" />
       <span>填写服务订单</span>
     </div>
     <div class="banner">
@@ -110,8 +104,8 @@ onMounted(() => {
     </div>
     <van-cell class="cell">
       <template #title>
-        <van-image height="25" width="25" :src="createInfo.service?.serviceImg" />
-        {{ createInfo.service?.serviceName }}
+        <van-image height="25" width="25" src="/img/card_1.png" />
+        {{ 'VIP服务' }}
       </template>
       <template #default> <div class="service-text">服务内容</div></template>
     </van-cell>
@@ -120,21 +114,21 @@ onMounted(() => {
       <van-cell>
         <template #title>就诊医院 </template>
         <template #default
-          ><div @click="showHospital = true">
-            {{ from.hospital_name || '请选择就诊医院' }}<van-icon name="arrow" />
-          </div>
+          ><div @click="showHospital = true">{{ from.hospital_name }}<van-icon name="arrow" /></div>
         </template>
       </van-cell>
       <van-cell>
         <template #title>就诊时间 </template>
         <template #default>
-          <div @click="showDate = true">{{ timer }}<van-icon name="arrow" /></div
+          <div @click="showDate = true">
+            {{ from.start_time || '请选择就诊时间' }}<van-icon name="arrow" /></div
         ></template>
       </van-cell>
       <van-cell>
         <template #title>陪诊师 </template>
         <template #default>
-          <div @click="showCompanion = true">{{ companion_name }}<van-icon name="arrow" /></div
+          <div @click="showCompanion = true">
+            {{ from.companion_name || '请选择陪诊师' }}<van-icon name="arrow" /></div
         ></template>
       </van-cell>
       <van-cell>
@@ -174,7 +168,7 @@ onMounted(() => {
       />
     </van-cell-group>
 
-    <van-button @click="sumbit" class="sumbit" type="primary" size="large">提交订单</van-button>
+    <van-button @click="submit" class="submit" type="primary" size="large">提交订单</van-button>
 
     <van-popup v-model:show="showHospital" position="bottom">
       <van-picker
@@ -183,6 +177,7 @@ onMounted(() => {
         @cancel="showHospital = false"
       />
     </van-popup>
+
     <van-popup v-model:show="showCompanion" position="bottom">
       <van-picker
         :columns="companionColumns"
@@ -195,13 +190,12 @@ onMounted(() => {
       <van-date-picker
         @confirm="dateOnConfirm"
         @cancel="showDate = false"
-        v-model="currentDate"
         :min-date="minDate"
         title="选择日期"
       />
     </van-popup>
 
-    <van-dialog :show-confirm-button="false" v-model:show="showcode">
+    <van-dialog :show-confirm-button="false" v-model:show="showCode">
       <van-icon name="cross" @click="closeCode" class="close" />
       <div>微信支付</div>
       <van-image height="150" width="150" :src="code" />
@@ -252,7 +246,7 @@ onMounted(() => {
     no-repeat center center;
   background-size: 20px;
 }
-.sumbit {
+.submit {
   position: absolute;
   bottom: 0;
 }

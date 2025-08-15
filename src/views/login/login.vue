@@ -5,13 +5,13 @@ import { useRouter } from 'vue-router'
 const { proxy } = getCurrentInstance()
 const router = useRouter()
 const from = reactive({
-  userName: '13623034184',
-  passWord: '111111',
+  phoneNumber: '',
+  password: '',
 })
 const onSubmit = async () => {
   let res = await proxy.$api.login(from)
   if (res) {
-    localStorage.setItem('token', res.token)
+    localStorage.setItem('c_token', res.c_token)
     localStorage.setItem('userInfo', JSON.stringify(res.userInfo))
     router.push('/home')
   }
@@ -23,14 +23,14 @@ const onSubmit = async () => {
   <van-form @submit="onSubmit">
     <van-cell-group inset>
       <van-field
-        v-model="from.userName"
-        name="用户名"
-        label="用户名"
-        placeholder="用户名"
-        :rules="[{ required: true, message: '请填写用户名' }]"
+        v-model="from.phoneNumber"
+        name="手机号"
+        label="手机号"
+        placeholder="手机号"
+        :rules="[{ required: true, message: '请填写手机号' }]"
       />
       <van-field
-        v-model="from.passWord"
+        v-model="from.password"
         type="password"
         name="密码"
         label="密码"

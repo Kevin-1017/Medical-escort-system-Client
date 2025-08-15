@@ -18,6 +18,7 @@ const props = defineProps({
     default: '',
   },
 })
+
 const emit = defineEmits(['counterOver'])
 // 倒计时显示
 const formater = ref('')

@@ -6,8 +6,11 @@ import User from '@/views/user/user.vue'
 import Login from '@/views/login/login.vue'
 import createOrder from '@/views/createOrder/createOrder.vue'
 import detail from '@/views/detail/detail.vue'
+
+const baseUrl = import.meta.env.BASE_URL || '/'
+
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(baseUrl),
   routes: [
     {
       path: '/',
@@ -15,7 +18,7 @@ const router = createRouter({
       redirect: '/home',
       children: [
         {
-          path: 'home',
+          path: '/home',
           meta: {
             icon: 'home-o',
             name: '首页',
@@ -23,7 +26,7 @@ const router = createRouter({
           component: Home,
         },
         {
-          path: 'order',
+          path: '/order',
           meta: {
             icon: 'orders-o',
             name: '订单',
@@ -31,7 +34,7 @@ const router = createRouter({
           component: Order,
         },
         {
-          path: 'user',
+          path: '/user',
           meta: {
             icon: 'user-circle-o',
             name: '我的',
@@ -42,17 +45,14 @@ const router = createRouter({
     },
     {
       path: '/login',
-      name: 'login',
       component: Login,
     },
     {
-      path: '/createOrder',
-      name: 'createOrder',
+      path: '/create-order',
       component: createOrder,
     },
     {
       path: '/detail',
-      name: 'detail',
       component: detail,
     },
   ],

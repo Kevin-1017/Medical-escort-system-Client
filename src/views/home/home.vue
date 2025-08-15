@@ -1,29 +1,40 @@
 <script setup>
-import { ref, getCurrentInstance, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+
 const router = useRouter()
-const { proxy } = getCurrentInstance()
-const homeData = ref({})
-const searchValue = ref('')
-const getHomeData = async () => {
-  const res = await proxy.$api.getHomeData()
-  if (res) {
-    //console.log(res)
-    homeData.value = res
-  }
-}
-
-const onSearch = async () => {}
-const goOrder = async (item) => {
-  router.push(`/createOrder?id=${item.id}`)
-}
-const goOrderTwo = async (index) => {
-  router.push(`/createOrder?id=${homeData.value.hospitals[index].id}`)
-}
-
-onMounted(() => {
-  getHomeData()
+// const { proxy } = getCurrentInstance()
+const homeData = ref({
+  slides: [
+    { id: 1, src: '/img/card_1.png' },
+    { id: 2, src: '/img/card_1.png' },
+  ],
+  hospitals: [
+    { id: 1, name: '医院一', rank: 'rank1', label: 'label1', intro: '介绍1' },
+    { id: 2, name: '医院二', rank: 'rank2', label: 'label2', intro: '介绍2' },
+  ],
 })
+const searchValue = ref('')
+// const getHomeData = async () => {
+//   const res = await proxy.$api.getHomeData()
+//   if (res) {
+//     homeData.value = res
+//   }
+// }
+
+const onSearch = async () => {
+  console.log('函数未声明')
+}
+const goOrder = async (item) => {
+  router.push(`/create-order?id=${item.id}`)
+}
+// const goOrderTwo = async (index) => {
+//   router.push(`/createOrder?id=${homeData.value.hospitals[index].id}`)
+// }
+
+// onMounted(() => {
+//   getHomeData()
+// })
 </script>
 
 <template>
@@ -36,19 +47,19 @@ onMounted(() => {
   </div>
   <van-swipe autoplay="3000" class="my-swiper" :show-indicators="false">
     <van-swipe-item v-for="item in homeData.slides" :key="item.id">
-      <van-image radius="5" :src="item.pic_image_url" />
+      <van-image radius="5" :src="item.src" />
     </van-swipe-item>
   </van-swipe>
 
   <van-row justify="space-around">
     <van-col
-      v-for="(item, index) in homeData.nav2s"
+      v-for="item in homeData.hospitals"
       :key="item.id"
       class="center-img"
       span="11"
-      @click="goOrderTwo(index)"
+      @click="goOrder(item)"
     >
-      <van-image :src="item.pic_image_url" />
+      <van-image src="/img/card_1.png" />
     </van-col>
   </van-row>
 
@@ -60,7 +71,7 @@ onMounted(() => {
     @click="goOrder(item)"
   >
     <van-col span="6">
-      <van-image class="vanImage" radius="5" :src="item.avatar_url" />
+      <van-image class="vanImage" radius="5" src="/img/card_1.png" />
     </van-col>
     <van-col class="yy" span="15">
       <div class="yy-name">{{ item.name }}</div>
